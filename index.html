@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -80,7 +80,7 @@
                 <li><span class="text-[#4285F4] font-bold">✨ Visual Neon:</span> Partículas pulsantes com núcleo luminoso.</li>
                 <li><span class="text-[#EA4335] font-bold">🎵 Som:</span> Notas musicais individuais.</li>
                 <li><span class="text-[#FBBC05] font-bold">🌌 Galáxia:</span> As partículas giram antes de se encaixar.</li>
-                <li><span class="text-[#34A853] font-bold">🌊 Fluido:</span> Ondas de luz intensa ao passar o mouse.</li>
+                <li><span class="text-[#34A853] font-bold">🌊 Fluido:</span> Ondas de luz intensa ao passar o rato.</li>
             </ul>
             <button id="start-btn" class="bg-white text-black hover:bg-gray-200 font-bold py-3 px-10 rounded-full transition-all shadow-[0_0_25px_rgba(255,255,255,0.3)] hover:shadow-[0_0_35px_rgba(255,255,255,0.5)] text-lg">
                 Começar Experiência
@@ -192,9 +192,10 @@
             });
         });
 
+        // Resize
         function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            canvas.width = window.innerWidth || document.documentElement.clientWidth || 800;
+            canvas.height = window.innerHeight || document.documentElement.clientHeight || 600;
             if (particleArray.length > 0) morphToNumber(currentNumber);
         }
         window.addEventListener('resize', resize);
@@ -255,8 +256,9 @@
                 this.isHovered = false;
 
                 if (distance < mouse.radius && mouse.x !== null) {
-                    let forceDirectionX = dxMouse / distance;
-                    let forceDirectionY = dyMouse / distance;
+                    let distSegura = distance || 1; 
+                    let forceDirectionX = dxMouse / distSegura;
+                    let forceDirectionY = dyMouse / distSegura;
                     let force = (mouse.radius - distance) / mouse.radius;
                     
                     let wave = Math.sin(distance * 0.1 - Date.now() * 0.01);
@@ -275,9 +277,10 @@
                 this.y += this.vy;
 
                 let hoverMultiplier = this.isHovered ? 2.5 : 1;
-                let sparkMultiplier = this.isSpark ? (1 + pulse * 1.5) : (1 + pulse * 0.3); 
+                // CORREÇÃO AQUI: Mudamos de 1.5 para 0.8 para o tamanho nunca ficar negativo!
+                let sparkMultiplier = this.isSpark ? (1 + pulse * 0.8) : (1 + pulse * 0.3); 
                 
-                this.currentSize = this.baseSize * sparkMultiplier * hoverMultiplier;
+                this.currentSize = Math.max(0.1, this.baseSize * sparkMultiplier * hoverMultiplier);
             }
 
             draw() {
@@ -308,7 +311,7 @@
             const offCanvas = document.createElement('canvas');
             const offCtx = offCanvas.getContext('2d', { willReadFrequently: true });
             
-            // Força as dimensões caso o canvas principal não esteja pronto
+            // Voltamos ao método original que é mais nítido
             offCanvas.width = canvas.width || window.innerWidth;
             offCanvas.height = canvas.height || window.innerHeight;
 
@@ -317,11 +320,11 @@
 
             offCtx.fillStyle = 'white';
             
-            // CORREÇÃO CRUCIAL AQUI: Math.floor garante que não enviamos decimais (ex: 634.5px) para a fonte
+            // Garantia extra para o tamanho da fonte não bugar
             let fontSize = Math.floor(Math.min(offCanvas.width, offCanvas.height) * 0.8);
-            fontSize = Math.max(fontSize, 20); // Garante um tamanho mínimo seguro
+            fontSize = Math.max(fontSize, 40); 
             
-            offCtx.font = `bold ${fontSize}px Arial, sans-serif`; 
+            offCtx.font = `bold ${fontSize}px 'Segoe UI', Arial, sans-serif`; 
             offCtx.textAlign = 'center';
             offCtx.textBaseline = 'middle';
             offCtx.fillText(text, offCanvas.width / 2, offCanvas.height / 2);
@@ -344,7 +347,7 @@
                         else if (nx < offCanvas.width/2 && ny >= offCanvas.height/2) colorIndex = 2; 
                         else colorIndex = 3; 
 
-                        validCoordinates.push({ x, y, color: GOOGLE_COLORS[colorIndex] });
+                        validCoordinates.push({ x: nx, y: ny, color: GOOGLE_COLORS[colorIndex] });
                     }
                 }
             }
@@ -361,7 +364,7 @@
                 
                 particleArray[i].isGalaxy = true;
                 particleArray[i].orbitAngle = Math.random() * Math.PI * 2;
-                particleArray[i].orbitRadius = Math.max(offCanvas.width, offCanvas.height) * (0.5 + Math.random());
+                particleArray[i].orbitRadius = Math.max(canvas.width, canvas.height) * (0.5 + Math.random());
             }
         }
 
