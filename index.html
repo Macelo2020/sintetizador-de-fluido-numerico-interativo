@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sintetizador Fluido I/O - Neon</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #050508;
+            font-family: 'Google Sans', 'Segoe UI', sans-serif;
+            touch-action: none; 
+        }
+        
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            cursor: crosshair;
+        }
+
+        .glass-panel {
+            background: rgba(10, 10, 15, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.9);
+        }
+
+        .num-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .num-btn:hover {
+            transform: translateY(-4px) scale(1.1);
+        }
+        .num-btn:active {
+            transform: translateY(2px) scale(0.9);
+        }
+
+        #intro-overlay {
+            transition: opacity 0.5s ease;
+        }
+
+        .text-gradient-io {
+            background: linear-gradient(90deg, #4285F4, #EA4335, #FBBC05, #34A853);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientMove 4s ease infinite;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Fonte mono para o subtítulo futurista */
+        .font-tech {
+            font-family: 'Courier New', Courier, monospace;
+            letter-spacing: 0.15em;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas"></canvas>
+
+    <!-- Overlay Inicial -->
+    <div id="intro-overlay" class="absolute inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md">
+        <div class="glass-panel p-10 rounded-3xl text-center max-w-lg mx-4">
+            <h1 class="text-5xl font-extrabold mb-6 tracking-tight text-gradient-io drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
+                I/O NEON SYNTH
+            </h1>
+            <ul class="text-left text-gray-300 mb-8 space-y-3 text-sm md:text-base">
+                <li><span class="text-[#4285F4] font-bold">✨ Visual Neon:</span> Partículas pulsantes com núcleo luminoso.</li>
+                <li><span class="text-[#EA4335] font-bold">🎵 Som:</span> Notas musicais individuais.</li>
+                <li><span class="text-[#FBBC05] font-bold">🌌 Galáxia:</span> As partículas giram antes de se encaixar.</li>
+                <li><span class="text-[#34A853] font-bold">🌊 Fluido:</span> Ondas de luz intensa ao passar o mouse.</li>
+            </ul>
+            <button id="start-btn" class="bg-white text-black hover:bg-gray-200 font-bold py-3 px-10 rounded-full transition-all shadow-[0_0_25px_rgba(255,255,255,0.3)] hover:shadow-[0_0_35px_rgba(255,255,255,0.5)] text-lg">
+                Começar Experiência
+            </button>
+        </div>
+    </div>
+
+    <!-- Header Futurista (Experiment) -->
+    <div id="top-header" class="absolute top-8 left-1/2 transform -translate-x-1/2 z-40 opacity-0 transition-opacity duration-1000 pointer-events-none w-[90%] max-w-md flex justify-center">
+        <div class="bg-black/50 backdrop-blur-md border border-white/10 px-6 py-2.5 rounded-full shadow-[0_0_30px_rgba(0,0,0,0.8)] relative overflow-hidden flex items-center gap-3">
+            <!-- Ponto pulsante -->
+            <div class="w-2 h-2 rounded-full bg-[#5b9cfc] animate-pulse shadow-[0_0_8px_#5b9cfc]"></div>
+            <!-- Texto -->
+            <h2 class="text-white/80 font-tech text-xs sm:text-sm uppercase whitespace-nowrap">
+                Google I/O Countdown Experiment
+            </h2>
+            <!-- Linha neon na base -->
+            <div class="absolute bottom-0 left-0 w-full h-[2px]" style="background: linear-gradient(90deg, #5b9cfc, #ff5a4d, #ffce33, #4ce36f);"></div>
+        </div>
+    </div>
+
+    <!-- UI - Painel de Controle -->
+    <div id="ui-panel" class="absolute bottom-6 left-1/2 transform -translate-x-1/2 glass-panel px-8 py-5 rounded-[2rem] opacity-0 transition-opacity duration-1000 w-[95%] max-w-4xl pointer-events-none">
+        <div class="flex flex-col items-center pointer-events-auto">
+            <div class="flex flex-wrap justify-center gap-3 sm:gap-5 w-full" id="buttons-container">
+                <!-- Botões gerados no JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const GOOGLE_COLORS = ['#5b9cfc', '#ff5a4d', '#ffce33', '#4ce36f'];
+
+        // --- CONFIGURAÇÕES DE ÁUDIO ---
+        let audioCtx;
+        const notes = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25, 783.99, 880.00];
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playNote(num) {
+            initAudio();
+            const freq = notes[num - 1];
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.05);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 1.5);
+        }
+
+        function playExplosionSound() {
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.5);
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.02);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.8);
+        }
+
+        // --- CANVAS & SIMULAÇÃO ---
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        
+        let particleArray = [];
+        let currentNumber = '1';
+        
+        let mouse = { x: null, y: null, radius: 150 };
+
+        window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+        window.addEventListener('touchmove', (e) => { mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; });
+        window.addEventListener('mouseleave', () => { mouse.x = null; mouse.y = null; });
+        window.addEventListener('touchend', () => { mouse.x = null; mouse.y = null; });
+
+        canvas.addEventListener('click', (e) => {
+            playExplosionSound();
+            const rect = canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+
+            particleArray.forEach(p => {
+                let dx = p.x - clickX;
+                let dy = p.y - clickY;
+                let dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                
+                let force = 4500 / dist; 
+                p.vx = (dx / dist) * force;
+                p.vy = (dy / dist) * force;
+                p.isGalaxy = false;
+            });
+        });
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            if (particleArray.length > 0) morphToNumber(currentNumber);
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.baseX = this.x;
+                this.baseY = this.y;
+                
+                this.vx = 0;
+                this.vy = 0;
+                
+                this.isSpark = Math.random() < 0.15; 
+                this.baseSize = this.isSpark ? (Math.random() * 0.8 + 0.4) : (Math.random() * 2 + 1);
+                this.currentSize = this.baseSize;
+                
+                this.pulseSpeed = Math.random() * 0.003 + 0.001;
+                this.pulseOffset = Math.random() * Math.PI * 2;
+                
+                this.density = (Math.random() * 30) + 10;
+                this.baseColor = GOOGLE_COLORS[Math.floor(Math.random() * GOOGLE_COLORS.length)];
+                
+                this.isGalaxy = false;
+                this.orbitAngle = 0;
+                this.orbitRadius = 0;
+                
+                this.isHovered = false;
+            }
+
+            update() {
+                let pulse = Math.sin(Date.now() * this.pulseSpeed + this.pulseOffset);
+                
+                if (this.isGalaxy) {
+                    this.orbitAngle += 0.04 + (Math.random() * 0.02);
+                    this.orbitRadius *= 0.93; 
+                    
+                    let targetX = this.baseX + Math.cos(this.orbitAngle) * this.orbitRadius;
+                    let targetY = this.baseY + Math.sin(this.orbitAngle) * this.orbitRadius;
+                    
+                    this.x += (targetX - this.x) * 0.1;
+                    this.y += (targetY - this.y) * 0.1;
+
+                    if (this.orbitRadius < 2) this.isGalaxy = false;
+                } else {
+                    let dxBase = this.baseX - this.x;
+                    let dyBase = this.baseY - this.y;
+                    this.vx += dxBase * 0.06; 
+                    this.vy += dyBase * 0.06;
+                }
+
+                let dxMouse = mouse.x - this.x;
+                let dyMouse = mouse.y - this.y;
+                let distance = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
+                
+                this.isHovered = false;
+
+                if (distance < mouse.radius && mouse.x !== null) {
+                    let forceDirectionX = dxMouse / distance;
+                    let forceDirectionY = dyMouse / distance;
+                    let force = (mouse.radius - distance) / mouse.radius;
+                    
+                    let wave = Math.sin(distance * 0.1 - Date.now() * 0.01);
+                    let pushPower = force * this.density * (1 + wave * 0.5);
+                    
+                    this.vx -= forceDirectionX * pushPower;
+                    this.vy -= forceDirectionY * pushPower;
+                    
+                    this.isHovered = true;
+                }
+
+                this.vx *= 0.82; 
+                this.vy *= 0.82;
+
+                this.x += this.vx;
+                this.y += this.vy;
+
+                let hoverMultiplier = this.isHovered ? 2.5 : 1;
+                let sparkMultiplier = this.isSpark ? (1 + pulse * 1.5) : (1 + pulse * 0.3); 
+                
+                this.currentSize = this.baseSize * sparkMultiplier * hoverMultiplier;
+            }
+
+            draw() {
+                ctx.globalAlpha = this.isSpark ? 0.3 : 0.15; 
+                ctx.fillStyle = this.baseColor;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.currentSize * 3, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.globalAlpha = this.isHovered ? 1 : 0.9;
+                ctx.fillStyle = (this.isSpark || this.isHovered) ? '#ffffff' : this.baseColor;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.currentSize * 0.6, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        function initParticles(count = 3800) {
+            particleArray = [];
+            for (let i = 0; i < count; i++) {
+                particleArray.push(new Particle());
+            }
+        }
+
+        function morphToNumber(text) {
+            const offCanvas = document.createElement('canvas');
+            const offCtx = offCanvas.getContext('2d', { willReadFrequently: true });
+            offCanvas.width = canvas.width;
+            offCanvas.height = canvas.height;
+
+            offCtx.fillStyle = 'black';
+            offCtx.fillRect(0, 0, offCanvas.width, offCanvas.height);
+
+            offCtx.fillStyle = 'white';
+            let fontSize = Math.min(canvas.width, canvas.height) * 0.8;
+            offCtx.font = `bold ${fontSize}px 'Google Sans', sans-serif`;
+            offCtx.textAlign = 'center';
+            offCtx.textBaseline = 'middle';
+            offCtx.fillText(text, offCanvas.width / 2, offCanvas.height / 2);
+
+            const textData = offCtx.getImageData(0, 0, offCanvas.width, offCanvas.height);
+            const validCoordinates = [];
+            const step = Math.floor(Math.min(canvas.width, canvas.height) / 120) || 3; 
+
+            for (let y = 0; y < textData.height; y += step) {
+                for (let x = 0; x < textData.width; x += step) {
+                    const index = (y * textData.width + x) * 4;
+                    if (textData.data[index] > 128) {
+                        let nx = x + (Math.random() - 0.5) * 80;
+                        let ny = y + (Math.random() - 0.5) * 80;
+                        
+                        let colorIndex = 0;
+                        if (nx < canvas.width/2 && ny < canvas.height/2) colorIndex = 0; 
+                        else if (nx >= canvas.width/2 && ny < canvas.height/2) colorIndex = 1; 
+                        else if (nx < canvas.width/2 && ny >= canvas.height/2) colorIndex = 2; 
+                        else colorIndex = 3; 
+
+                        validCoordinates.push({ x, y, color: GOOGLE_COLORS[colorIndex] });
+                    }
+                }
+            }
+
+            if (validCoordinates.length === 0) return;
+            validCoordinates.sort(() => Math.random() - 0.5);
+
+            for (let i = 0; i < particleArray.length; i++) {
+                const targetPoint = validCoordinates[i % validCoordinates.length];
+                
+                particleArray[i].baseX = targetPoint.x;
+                particleArray[i].baseY = targetPoint.y;
+                particleArray[i].baseColor = targetPoint.color;
+                
+                particleArray[i].isGalaxy = true;
+                particleArray[i].orbitAngle = Math.random() * Math.PI * 2;
+                particleArray[i].orbitRadius = Math.max(canvas.width, canvas.height) * (0.5 + Math.random());
+            }
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(5, 5, 8, 0.4)'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.globalCompositeOperation = 'lighter'; 
+
+            for (let i = 0; i < particleArray.length; i++) {
+                particleArray[i].update();
+                particleArray[i].draw();
+            }
+            
+            ctx.globalCompositeOperation = 'source-over';
+            requestAnimationFrame(animate);
+        }
+
+        // --- UI E EVENTOS ---
+        const btnContainer = document.getElementById('buttons-container');
+        for (let i = 1; i <= 10; i++) {
+            const btn = document.createElement('button');
+            btn.innerText = i;
+            
+            const btnColor = GOOGLE_COLORS[(i - 1) % 4]; 
+            
+            btn.className = `num-btn w-12 h-12 sm:w-16 sm:h-16 rounded-full text-xl sm:text-2xl font-bold flex items-center justify-center border-2`;
+            btn.style.borderColor = btnColor;
+            btn.style.color = '#fff';
+            btn.style.backgroundColor = 'transparent';
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                currentNumber = i.toString();
+                morphToNumber(currentNumber);
+                playNote(i);
+
+                document.querySelectorAll('.num-btn').forEach(b => {
+                    b.style.backgroundColor = 'transparent';
+                    b.style.boxShadow = 'none';
+                });
+                btn.style.backgroundColor = btnColor;
+                btn.style.boxShadow = `0 0 20px ${btnColor}, inset 0 0 10px rgba(255,255,255,0.5)`;
+            });
+            
+            btnContainer.appendChild(btn);
+        }
+
+        document.getElementById('start-btn').addEventListener('click', () => {
+            document.getElementById('intro-overlay').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('intro-overlay').style.display = 'none';
+                document.getElementById('ui-panel').style.opacity = '1';
+                document.getElementById('top-header').style.opacity = '1'; // Revela o header
+                
+                initAudio();
+                initParticles(3800); 
+                animate();
+                
+                const firstBtn = btnContainer.firstElementChild;
+                if (firstBtn) firstBtn.click();
+            }, 500);
+        });
+
+    </script>
+</body>
+</html>
+```eof
