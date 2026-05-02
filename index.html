@@ -133,7 +133,7 @@
             gainNode.connect(audioCtx.destination);
 
             gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-            gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.05);
+            gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.02); // Ataque ultra-rápido
             gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
 
             osc.start();
@@ -147,17 +147,17 @@
             
             osc.type = 'sawtooth';
             osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.5);
+            osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.4);
             
             osc.connect(gainNode);
             gainNode.connect(audioCtx.destination);
 
             gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-            gainNode.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.02);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+            gainNode.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
 
             osc.start();
-            osc.stop(audioCtx.currentTime + 0.8);
+            osc.stop(audioCtx.currentTime + 0.6);
         }
 
         // --- CANVAS & SIMULAÇÃO ---
@@ -185,14 +185,14 @@
                 let dy = p.y - clickY;
                 let dist = Math.sqrt(dx * dx + dy * dy) || 1;
                 
-                let force = 4500 / dist; 
+                // EXPLOSÃO MASSIVA (Igual ao vídeo)
+                let force = 20000 / dist; 
                 p.vx = (dx / dist) * force;
                 p.vy = (dy / dist) * force;
                 p.isGalaxy = false;
             });
         });
 
-        // Resize
         function resize() {
             canvas.width = window.innerWidth || document.documentElement.clientWidth || 800;
             canvas.height = window.innerHeight || document.documentElement.clientHeight || 600;
@@ -212,7 +212,7 @@
                 this.vy = 0;
                 
                 this.isSpark = Math.random() < 0.15; 
-                this.baseSize = this.isSpark ? (Math.random() * 0.8 + 0.4) : (Math.random() * 2 + 1);
+                this.baseSize = this.isSpark ? (Math.random() * 0.5 + 0.5) : (Math.random() * 1.5 + 0.5);
                 this.currentSize = this.baseSize;
                 
                 this.pulseSpeed = Math.random() * 0.003 + 0.001;
@@ -232,21 +232,24 @@
                 let pulse = Math.sin(Date.now() * this.pulseSpeed + this.pulseOffset);
                 
                 if (this.isGalaxy) {
-                    this.orbitAngle += 0.04 + (Math.random() * 0.02);
-                    this.orbitRadius *= 0.93; 
+                    // Rotação hiper rápida e colapso vigoroso
+                    this.orbitAngle += 0.2 + (Math.random() * 0.1); 
+                    this.orbitRadius *= 0.80; 
                     
                     let targetX = this.baseX + Math.cos(this.orbitAngle) * this.orbitRadius;
                     let targetY = this.baseY + Math.sin(this.orbitAngle) * this.orbitRadius;
                     
-                    this.x += (targetX - this.x) * 0.1;
-                    this.y += (targetY - this.y) * 0.1;
+                    this.x += (targetX - this.x) * 0.3;
+                    this.y += (targetY - this.y) * 0.3;
 
                     if (this.orbitRadius < 2) this.isGalaxy = false;
                 } else {
                     let dxBase = this.baseX - this.x;
                     let dyBase = this.baseY - this.y;
-                    this.vx += dxBase * 0.06; 
-                    this.vy += dyBase * 0.06;
+                    
+                    // FORÇA MAGNÉTICA MUITO FORTE (Estala no lugar rapidamente)
+                    this.vx += dxBase * 0.25; 
+                    this.vy += dyBase * 0.25;
                 }
 
                 let dxMouse = mouse.x - this.x;
@@ -270,81 +273,84 @@
                     this.isHovered = true;
                 }
 
-                this.vx *= 0.82; 
-                this.vy *= 0.82;
+                // ATRITO ALTO (Pára rápido no sítio em vez de oscilar demais)
+                this.vx *= 0.65; 
+                this.vy *= 0.65;
 
                 this.x += this.vx;
                 this.y += this.vy;
 
                 let hoverMultiplier = this.isHovered ? 2.5 : 1;
-                // CORREÇÃO AQUI: Mudamos de 1.5 para 0.8 para o tamanho nunca ficar negativo!
                 let sparkMultiplier = this.isSpark ? (1 + pulse * 0.8) : (1 + pulse * 0.3); 
                 
                 this.currentSize = Math.max(0.1, this.baseSize * sparkMultiplier * hoverMultiplier);
             }
 
             draw() {
-                ctx.globalAlpha = this.isSpark ? 0.3 : 0.15; 
+                ctx.globalAlpha = this.isSpark ? 0.5 : 0.2; 
                 ctx.fillStyle = this.baseColor;
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, this.currentSize * 3, 0, Math.PI * 2);
+                ctx.arc(this.x, this.y, this.currentSize * 2, 0, Math.PI * 2);
                 ctx.fill();
 
                 ctx.globalAlpha = this.isHovered ? 1 : 0.9;
                 ctx.fillStyle = (this.isSpark || this.isHovered) ? '#ffffff' : this.baseColor;
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, this.currentSize * 0.6, 0, Math.PI * 2);
+                ctx.arc(this.x, this.y, this.currentSize * 0.7, 0, Math.PI * 2); 
                 ctx.fill();
                 
                 ctx.globalAlpha = 1;
             }
         }
 
-        function initParticles(count = 3800) {
+        function initParticles(count = 4500) {
             particleArray = [];
             for (let i = 0; i < count; i++) {
                 particleArray.push(new Particle());
             }
         }
 
+        // --- RENDERIZAÇÃO EM ALTA DEFINIÇÃO (IGUAL AO GEMINI) ---
         function morphToNumber(text) {
+            let w = canvas.width || window.innerWidth;
+            let h = canvas.height || window.innerHeight;
+
             const offCanvas = document.createElement('canvas');
+            offCanvas.width = w;
+            offCanvas.height = h;
             const offCtx = offCanvas.getContext('2d', { willReadFrequently: true });
             
-            // Voltamos ao método original que é mais nítido
-            offCanvas.width = canvas.width || window.innerWidth;
-            offCanvas.height = canvas.height || window.innerHeight;
-
             offCtx.fillStyle = 'black';
-            offCtx.fillRect(0, 0, offCanvas.width, offCanvas.height);
+            offCtx.fillRect(0, 0, w, h);
 
             offCtx.fillStyle = 'white';
             
-            // Garantia extra para o tamanho da fonte não bugar
-            let fontSize = Math.floor(Math.min(offCanvas.width, offCanvas.height) * 0.8);
+            let fontSize = Math.floor(Math.min(w, h) * 0.85);
             fontSize = Math.max(fontSize, 40); 
             
             offCtx.font = `bold ${fontSize}px 'Segoe UI', Arial, sans-serif`; 
             offCtx.textAlign = 'center';
             offCtx.textBaseline = 'middle';
-            offCtx.fillText(text, offCanvas.width / 2, offCanvas.height / 2);
+            offCtx.fillText(text, w / 2, h / 2);
 
-            const textData = offCtx.getImageData(0, 0, offCanvas.width, offCanvas.height);
+            const textData = offCtx.getImageData(0, 0, w, h);
             const validCoordinates = [];
             
-            const step = Math.floor(Math.min(offCanvas.width, offCanvas.height) / 120) || 3; 
+            // Otimização para não pesar computadores lentos (Adapta-se ao ecrã)
+            const step = Math.floor(Math.min(w, h) / 150) || 3; 
 
-            for (let y = 0; y < textData.height; y += step) {
-                for (let x = 0; x < textData.width; x += step) {
-                    const index = (y * textData.width + x) * 4;
+            for (let y = 0; y < h; y += step) {
+                for (let x = 0; x < w; x += step) {
+                    const index = (y * w + x) * 4;
                     if (textData.data[index] > 128) {
-                        let nx = x + (Math.random() - 0.5) * 80;
-                        let ny = y + (Math.random() - 0.5) * 80;
+                        // Ruído mínimo apenas para evitar a perfeição matemática
+                        let nx = x + (Math.random() - 0.5) * 6;
+                        let ny = y + (Math.random() - 0.5) * 6;
                         
                         let colorIndex = 0;
-                        if (nx < offCanvas.width/2 && ny < offCanvas.height/2) colorIndex = 0; 
-                        else if (nx >= offCanvas.width/2 && ny < offCanvas.height/2) colorIndex = 1; 
-                        else if (nx < offCanvas.width/2 && ny >= offCanvas.height/2) colorIndex = 2; 
+                        if (nx < w/2 && ny < h/2) colorIndex = 0; 
+                        else if (nx >= w/2 && ny < h/2) colorIndex = 1; 
+                        else if (nx < w/2 && ny >= h/2) colorIndex = 2; 
                         else colorIndex = 3; 
 
                         validCoordinates.push({ x: nx, y: ny, color: GOOGLE_COLORS[colorIndex] });
@@ -364,7 +370,8 @@
                 
                 particleArray[i].isGalaxy = true;
                 particleArray[i].orbitAngle = Math.random() * Math.PI * 2;
-                particleArray[i].orbitRadius = Math.max(canvas.width, canvas.height) * (0.5 + Math.random());
+                // Galáxia Muito Maior e Imponente
+                particleArray[i].orbitRadius = Math.max(w, h) * (0.6 + Math.random() * 0.5);
             }
         }
 
@@ -399,8 +406,12 @@
             btn.addEventListener('click', (e) => {
                 e.stopPropagation(); 
                 currentNumber = i.toString();
-                morphToNumber(currentNumber);
+
                 playNote(i);
+
+                setTimeout(() => {
+                    morphToNumber(currentNumber);
+                }, 10);
 
                 document.querySelectorAll('.num-btn').forEach(b => {
                     b.style.backgroundColor = 'transparent';
@@ -421,7 +432,7 @@
                 document.getElementById('top-header').style.opacity = '1';
                 
                 initAudio();
-                initParticles(3800); 
+                initParticles(4500); 
                 animate();
                 
                 const firstBtn = btnContainer.firstElementChild;
