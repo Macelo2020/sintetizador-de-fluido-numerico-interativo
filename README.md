@@ -2,7 +2,9 @@
 
 # 🧪 Sintetizador de Fluido Numérico Interativo
 
-<img width="800" height="423" alt="video" src="https://github.com/user-attachments/assets/185b7551-9ec0-4627-93ee-b8a5a32e5840" />
+<video src="https://github.com/Macelo2020/sintetizador-de-fluido-numerico-interativo/raw/main/imagens/video.mp4" controls="controls" style="max-width: 100%;">
+  O seu navegador não suporta a reprodução de vídeos.
+</video>
 
 Um experimento interativo e áudio-visual criado com JavaScript puro e HTML5 Canvas. A aplicação combina a renderização visual de alta performance com a síntese de áudio nativa do navegador (Web Audio API), customizada com a paleta de cores e identidade visual do **Google I/O**.
 
