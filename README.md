@@ -66,3 +66,15 @@ A física matemática por trás do motor gráfico foi configurada para criar qua
 1. Clone este repositório:
    ```bash
    git clone https://github.com/Macelo2020/sintetizador-de-fluido-numerico-interativo.git
+
+
+   ---
+
+<p align="center">
+  <br/>
+  <img src="https://github.com/Macelo2020/Macelo2020/raw/main/Logo%20Vertical%20Blue%20Frog.png" alt="BlueFrog Smart Solutions" width="160px"/>
+  <br/>
+  <sub><b>BlueFrog Smart Solutions</b> • Soluções Inteligentes com IA & Automação</sub>
+  <br/>
+  <sub>© 2026 Hospital São Vicente de Paulo. Todos os direitos reservados.</sub>
+</p>
