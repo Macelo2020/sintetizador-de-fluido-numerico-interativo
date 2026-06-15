@@ -1,38 +1,67 @@
 # 🧪 Sintetizador de Fluido Numérico Interativo
 
-### 🚀 [CLIQUE AQUI PARA TESTAR O SINTETIZADOR AO VIVO](https://macelo2020.github.io/sintetizador-de-fluido-numerico-interativo/)
+<p align="center">
+  <img src="https://img.shields.io/badge/JavaScript-Pure%20ES6-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">
+  <img src="https://img.shields.io/badge/HTML5-Canvas%20API-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="Canvas API">
+  <img src="https://img.shields.io/badge/Web%20Audio-API%20Nativa-000000?style=for-the-badge&logo=audiomack&logoColor=white" alt="Web Audio API">
+</p>
 
-<video src="https://github.com/Macelo2020/sintetizador-de-fluido-numerico-interativo/raw/main/imagens/video.mp4" controls="controls" style="max-width: 100%;">
-  O seu navegador não suporta a reprodução de vídeos.
-</video>
+<p align="center">
+  <a href="https://macelo2020.github.io/sintetizador-de-fluido-numerico-interativo/" target="_blank">
+    <img src="https://img.shields.io/badge/%F0%9F%9A%80%20CLIQUE%20AQUI%20PARA%20TESTAR%20O%20SINTETIZADOR%20AO%20VIVO-blueviolet?style=for-the-badge&logo=githubpages&logoColor=white" alt="Testar ao Vivo" />
+  </a>
+</p>
 
-Um experimento interativo e áudio-visual criado com JavaScript puro e HTML5 Canvas. A aplicação combina a renderização visual de alta performance com a síntese de áudio nativa do navegador (Web Audio API), customizada com a paleta de cores e identidade visual do **Google I/O**.
+---
+
+### 📝 Sobre o Projeto
+
+Um experimento interativo e áudio-visual imersivo criado com **JavaScript Puro** e **HTML5 Canvas**. A aplicação combina a renderização visual de alta performance com a síntese de áudio nativa do navegador (**Web Audio API**), totalmente customizada com a paleta de cores neon e a identidade de design do Google I/O.
+
+---
+
+## 🎬 Demonstração em Vídeo
+
+<p align="center">
+  <video src="https://github.com/Macelo2020/sintetizador-de-fluido-numerico-interativo/raw/main/imagens/video.mp4" controls="controls" style="max-width: 100%; border-radius: 10px; box-shadow: 0px 4px 15px rgba(0,0,0,0.5);">
+    O seu navegador não suporta a reprodução de vídeos.
+  </video>
+</p>
+
+---
 
 ## 📸 Galeria Visual
 
-![Ecrã Inicial](imagens/foto1.png)
+### Tela Inicial e Modos de Interação
+<p align="center">
+  <img src="imagens/foto1.png" alt="Ecrã Inicial" width="31%" style="border-radius: 8px; margin-right: 2%; border: 1px solid #333;"/>
+  <img src="imagens/foto2.png" alt="Número Formado" width="31%" style="border-radius: 8px; margin-right: 2%; border: 1px solid #333;"/>
+  <img src="imagens/foto3.png" alt="Explosão de Partículas" width="31%" style="border-radius: 8px; border: 1px solid #333;"/>
+</p>
 
-![Número Formado](imagens/foto2.png)
+---
 
-![Explosão de Partículas](imagens/foto3.png)
+## ⚙️ Funcionalidades e Modos de Interação
 
-## ✨ Funcionalidades e Modos de Interação
+A física matemática por trás do motor gráfico foi configurada para criar quatro comportamentos dinâmicos distintos baseados nas interações do usuário:
 
-A física matemática foi configurada para criar quatro comportamentos dinâmicos distintos:
+* 🌌 **Modo Galáxia:** Ao alternar os numerais, as milhares de partículas orbitam em uma espiral matemática fluida antes de se alinharem na nova forma.
+* 🌊 **Modo Fluido:** Interação suave de repulsão e atração vetorial ao passar o cursor do mouse ou o dedo sobre as partículas pulsantes.
+* 🎉 **Modo Celebração:** Cliques diretos na tela disparam ondas de choque mecânicas com efeito sonoro de explosão harmônica e expansão de luz.
+* 🎵 **Sintetizador Integrado:** Cada número está mapeado algoritmicamente para uma nota específica de uma **Escala Pentatônica**, gerando arranjos musicais únicos a cada clique.
 
-* 🌌 **Modo Galáxia:** Ao trocar de número, as partículas giram numa espiral antes de se alinharem.
-* 🌊 **Modo Fluido:** Interação suave ao passar o rato ou o dedo sobre as partículas.
-* 🎉 **Modo Celebração:** Um clique dispara uma "onda de choque" mecânica com efeito sonoro de explosão.
-* 🎵 **Sintetizador Integrado:** Cada número está mapeado para uma nota de uma Escala Pentatónica.
+---
 
-## 🛠️ Detalhes Técnicos
+## 🛠️ Detalhes Técnicos & Performance
 
-* **Motor Visual (Canvas):** Renderiza **4.500 partículas** simultaneamente a 60 FPS.
-* **Alta Performance:** Matemática otimizada para garantir fluidez sem bloqueios de processador.
-* **Motor de Áudio:** Sintetizador construído do zero com a Web Audio API.
-* **Interface (UI):** Construída com Tailwind CSS utilizando o estilo *Glassmorphism*.
+* ⚡ **Engine Visual (Canvas):** Renderização pesada otimizada para processar mais de **4.500 partículas simultâneas a cravados 60 FPS**.
+* 🧠 **Matemática Otimizada:** Algoritmos de interpolação linear e cálculo vetorial para garantir fluidez orgânica sem causar travamentos ou bloqueios no processador.
+* 🔊 **Engine de Áudio:** Sintetizador de ondas construído do zero com osciladores puros e nós de ganho dinâmicos via **Web Audio API** nativa.
+* 🎨 **Interface (UI):** Menu minimalista e botões construídos em Tailwind CSS aplicando efeitos modernos de **Glassmorphism**.
 
-## 🚀 Como correr o projeto localmente
+---
+
+## 🚀 Como rodar o projeto localmente
 
 1. Clone este repositório:
    ```bash
