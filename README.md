@@ -65,4 +65,4 @@ A física matemática por trás do motor gráfico foi configurada para criar qua
 
 1. Clone este repositório:
    ```bash
-   git clone [https://github.com/Macelo2020/sintetizador-de-fluido-numerico-interativo.git](https://github.com/Macelo2020/sintetizador-de-fluido-numerico-interativo.git)
+   git clone https://github.com/Macelo2020/sintetizador-de-fluido-numerico-interativo.git
