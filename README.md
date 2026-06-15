@@ -75,11 +75,10 @@ A física matemática por trás do motor gráfico foi configurada para criar qua
   <br/>
   👨‍💻 Desenvolvedor: Marcelo Nascimento dos Santos 
   <br/>
-  <sub><b>Senior Systems Analyst & AI Specialist | Founder of BlueFrog Smart Solutions. Building the future with AI-Assisted Dev & No-Code.</sub>
-  </p>
+  <sub><b>Senior Systems Analyst & AI Specialist | Founder of BlueFrog Smart Solutions. Building the future with AI-Assisted Dev & No-Code.</b></sub>
+</p>
 
 ---
-
 ---
 
 <p align="center">
@@ -92,4 +91,3 @@ A física matemática por trás do motor gráfico foi configurada para criar qua
   <br/><br/>
   ⭐ <b>Se este projeto foi útil para você, deixe uma estrela no repositório!</b>
 </p>
-
